@@ -5,12 +5,19 @@ import scala.collection.immutable.HashMap
 object Generation {
 
   def structureGenerator(localFormula: String): Unit = {
-    val noHydrogen: Boolean = false
-    val jusH: Boolean = false
+    var noHydrogen: Boolean = false
+    var justH: Boolean = false
+    var hIndex: Int = -1
+    var size: Int = -1
 
-    if (noHydrogen) {
-    } else if (jusH) {
-    } else {
+    if (noHydrogen) { // "H" 가 없을 때?
+      size = Utils.getOnlySymbols(localFormula).length - Utils.getHydrogensCount(localFormula)
+    } else if (justH) { // 오직 "H"만 있을 때?
+      size = Utils.getOnlySymbols(localFormula).length - Utils.getHydrogensCount(localFormula)
+    } else { // 원소기호 "H" 를 제외한 나머지 원소들의 개수
+      size = Utils.getOnlySymbols(localFormula).length - Utils.getHydrogensCount(localFormula)
+    }
+    val newDegrees = Utils.distributeHydrogens(localFormula)
       val atoms: Array[String] = Utils.splitByAtoms(localFormula)
       val atomHashMap: HashMap[String, Int] = Utils.makeAtomHashMap(localFormula)
       val atomTupleList = atomHashMap.toList
@@ -38,8 +45,8 @@ object Generation {
       val hydrogenCount = hydrogenTuple._2
       // 아직은 알 수 없는 변수들
       var calllHydrogenDistributor = false
-      var justH = false
-      var noHydrogen = true
+      justH = false
+      noHydrogen = true
 
       if (hydrogenCount != 0) {
         val hydrogenIndex = sorted.map(tuple => tuple._2).sum
@@ -56,7 +63,4 @@ object Generation {
         noHydrogen = true
       }
     }
-
-  }
-
 }

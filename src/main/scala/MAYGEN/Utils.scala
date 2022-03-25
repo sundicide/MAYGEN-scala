@@ -33,11 +33,69 @@ object Utils {
     return true
   }
 
+  /**
+   * getValences로 구해진 결과 값들에 대해 각 원소의 valence 값을 곱한다.
+   * @param formula
+   * @return
+   */
+  def getCapacity(formula: String): Array[Int] = {
+    val atomsHashMap = Utils.makeAtomHashMap(formula)
+    val atomList = sortAtomListDesc(formula)
+      .map(d => atomsHashMap.getOrElse(d, -1))
+    getValences(formula)
+      .zipWithIndex
+      .map(d => {
+        val calcResult = d._1 * atomList(d._2)
+        if (calcResult < 0 ) 0
+        else calcResult
+      })
+  }
+
+  /**
+   * formula의 degree List를 계산한다
+   * @param formula C2O6H2
+   * @return [4, 4, 2, 2, 2, 2, 2, 2, 1, 1]
+   */
+  def getDegrees(formula: String): Array[Int] = {
+    val symbolList: Array[String] = getOnlySymbols(formula)
+    initDegrees(symbolList)
+  }
+
   def getFuzzyFormulaRanges(localFormula: String): Unit = {
     val atoms: Array[String] = localFormula.split(Consts.LETTERS_FROM_A_TO_Z)
     val atom: Array[Array[String]] = atoms.map((atom: String) => atom.split("\\["))
     atom foreach (elem => println(elem mkString (", ")))
   }
+
+  /**
+   * formula의 occurences List를 계산한다.
+   * @param formula C2O6H2
+   * @return [2, 6, 2]
+   */
+  def getOccurences(formula: String): Array[Int] = {
+    val atomHashMap: HashMap[String, Int] = Utils.makeAtomHashMap(formula)
+    sortAtomListDesc(formula)
+      .map(atom => atomHashMap.getOrElse(atom, -1))
+  }
+
+  /**
+   * Atom을 동일 atom 등장 개수, valence 크기에 따라 정렬한 뒤 각 값에 맞게 계산한다.
+   * @param formula C2I2H2
+   * @return [0, 3, 0]
+   *   앞에서부터 차례로 [I, C, H] 이다.
+   *   H는 항상 뒤에, I와 C는 개수가 동일하므로 valence 값이 더 큰 C가 뒤에 배치
+   *   또한 I의 Valence값은 1이므로 1-1 = 0이 되고
+   *   C의 Valence값은 4이므로 4-1 = 3이 된다.
+   */
+  def getValences(formula: String): Array[Int] = {
+    sortAtomListDesc(formula)
+      .map(d => {
+        val valence = Consts.VALENCE.getOrElse(d, 0) - 1
+        if (valence < 0) 0
+        else valence
+      })
+  }
+
   def normalizeFormula(param: String): String = {
     val exchanger: Map[Char, Char] = Map(
       'c' -> 'C',
@@ -162,5 +220,96 @@ object Utils {
       }
     }
     loop(splitByAtoms(smilesString), HashMap())
+  }
+
+  /**
+   * 전달 받은 atomList를 각 Valence 값으로 치환한다.
+   * @param atomList ["C", "C", "O", "O"]
+   * @return [4, 4, 2, 2]
+   */
+  def initDegrees(atomList: Array[String]): Array[Int] = {
+    atomList.map(atom => Consts.VALENCE.getOrElse(atom, -1))
+  }
+
+  def distributeHydrogens(formula: String): Unit = {
+    // 알 수 없는 값
+    var callHydrogenDistributor = true
+
+    if (!callHydrogenDistributor) {
+      // firstDegrees
+    } else {
+      val distributions = HydrogenDistributor.run(formula)
+    }
+  }
+
+  /**
+   * 주어진 index 만큼의 배열내 배열을 생성한다.
+   * @param idx 2
+   * @return [[0,2], [1,2], [2,2], ...]
+   */
+  def makeAllPossibilityArray(idx: Int): Array[Array[Int]] = {
+    @tailrec
+    def loop(arr: Array[Array[Int]]): Array[Array[Int]] = {
+      if (arr.head.length >= idx) arr
+      else {
+        val result = for {
+          ar <- arr
+          i <- 0 to idx
+        } yield(ar :+ i)
+        loop(result)
+      }
+    }
+    loop(Array(Array()))
+  }
+
+  def partition(formula: String): Array[Array[Int]] = {
+    val degrees = Utils.getOccurences(formula)
+    val hydrogenCounts = Utils.getHydrogensCount(formula)
+    val isotopes = degrees.length - 1
+    val capacity = Utils.getCapacity(formula)
+
+    val allArr = makeAllPossibilityArray(isotopes)
+    allArr.filter((d: Array[Int]) => {
+      val innerArr: Array[Int] = d
+      if (innerArr.sum != hydrogenCounts) false
+      else {
+        val found = innerArr.zipWithIndex.find(d => d._1 > capacity(d._2))
+        found match {
+          case Some(_) => false
+          case _ => true
+        }
+      }
+    })
+      .reverse
+  }
+
+  /**
+   * Atom을 개수, valence 크기에 따라 정렬한다.
+   * @param formula C2I2H2
+   * @return [I, C, H]
+   *   H는 항상 뒤에, I와 C는 개수가 동일하므로 valence 값이 더 큰 C가 뒤에 배치
+   */
+  def sortAtomListDesc(formula: String): Array[String] = {
+    val atomHashMap: HashMap[String, Int] = Utils.makeAtomHashMap(formula)
+    val atomCountTupleArray: Array[(String, Int)] = atomHashMap.toArray
+
+    val (nonHydrogenTupleList, hydrogenTuple) = atomCountTupleArray.foldLeft(Array(): Array[(String, Int)], null: (String, Int))((acc, curr) => {
+      curr match {
+        case (key: String, _: Int) => if (key.equals("H")) (acc._1, curr)
+        else (acc._1 :+ curr, acc._2)
+      }
+    })
+    val sortedArray = nonHydrogenTupleList.sortWith((before, after) => {
+      val (beforeAtom, beforeValue) = before
+      val (afterAtom, afterValue) = after
+
+      if (beforeValue == afterValue) {
+        Consts.VALENCE.getOrElse(afterAtom, -1) - Consts.VALENCE.getOrElse(beforeAtom, -1) > 0
+      } else {
+        afterValue - beforeValue > 0
+      }
+    })
+      .map(d => d._1)
+    sortedArray :+ hydrogenTuple._1
   }
 }

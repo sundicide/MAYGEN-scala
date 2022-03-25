@@ -55,5 +55,9 @@ object MAYGEN {
     if (Utils.checkLengthTwoFormula(atoms)) {}
     //    Utils.getFuzzyFormulaRanges(normalizedFormula)
     Generation.structureGenerator(normalizedFormula)
+
+    Utils.initDegrees(Utils.getOnlySymbols(normalizedFormula))
+
+    Generation.structureGenerator(normalizedFormula)
   }
 }
