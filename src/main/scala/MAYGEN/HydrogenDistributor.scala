@@ -24,4 +24,19 @@ object HydrogenDistributor {
       }
     )
   }
+
+  def distribute(formula: String): Unit = {
+    val valences = Utils.getValences(formula)
+    val atoms = Utils.getOccurences(formula)
+
+    val hydrogenCount = Utils.getHydrogensCount(formula)
+    for {
+      i <- valences
+//      ii <- Math.min(i, hydrogenCount)
+    } {
+      print(i)
+//      if ()
+    }
+
+  }
 }

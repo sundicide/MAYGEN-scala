@@ -262,6 +262,12 @@ object Utils {
     loop(Array(Array()))
   }
 
+  /**
+   * 아직은 어떤 기능인지 알 수는 없지만 본 코드에서 필요한 부분이라 생각해 가져온 함수
+   * 본 코드에서는 getPartition이란 네이밍이다.
+   * @param formula C2H6O2
+   * @return [[2, 0], [1, 1], [0, 2]]
+   */
   def partition(formula: String): Array[Array[Int]] = {
     val degrees = Utils.getOccurences(formula)
     val hydrogenCounts = Utils.getHydrogensCount(formula)

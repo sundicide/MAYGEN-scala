@@ -17,7 +17,7 @@ object Generation {
     } else { // 원소기호 "H" 를 제외한 나머지 원소들의 개수
       size = Utils.getOnlySymbols(localFormula).length - Utils.getHydrogensCount(localFormula)
     }
-    val newDegrees = Utils.distributeHydrogens(localFormula)
+      val newDegrees = Utils.distributeHydrogens(localFormula)
       val atoms: Array[String] = Utils.splitByAtoms(localFormula)
       val atomHashMap: HashMap[String, Int] = Utils.makeAtomHashMap(localFormula)
       val atomTupleList = atomHashMap.toList
@@ -43,6 +43,7 @@ object Generation {
 
       // MAYGEN.java 573라인 getParition은 제외
       val hydrogenCount = hydrogenTuple._2
+      val occurences = Utils.partition(localFormula)
       // 아직은 알 수 없는 변수들
       var calllHydrogenDistributor = false
       justH = false

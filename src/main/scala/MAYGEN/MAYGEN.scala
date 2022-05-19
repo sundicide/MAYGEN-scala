@@ -56,8 +56,8 @@ object MAYGEN {
     //    Utils.getFuzzyFormulaRanges(normalizedFormula)
     Generation.structureGenerator(normalizedFormula)
 
-    Utils.initDegrees(Utils.getOnlySymbols(normalizedFormula))
+//    Utils.initDegrees(Utils.getOnlySymbols(normalizedFormula))
 
-    Generation.structureGenerator(normalizedFormula)
+//    Generation.structureGenerator(normalizedFormula)
   }
 }
