@@ -86,4 +86,7 @@ class HydrogenDistributorTest {
       result
     )
   }
+
+  @Test def `zipTest`() : Unit = {
+  }
 }

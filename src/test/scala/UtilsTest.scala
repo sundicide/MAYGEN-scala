@@ -62,13 +62,14 @@ class UtilsTestSuite {
   }
 
   @Test def getOccurences(): Unit = {
-    val testSmiles = "C2O6H2Cl4"
-//    println(Utils.getOccurences(testSmiles) mkString "\n")
-    val testSmiles2 = "C2O6H2Cl4P5"
-//    println(Utils.getOccurences(testSmiles2) mkString "\n")
-
-    val testSmiles3 = "C2H2I2"
-    println(Utils.getOccurences(testSmiles3) mkString "\t")
+    assertEquals(
+      Utils.getOccurences("C2H2I2").toList,
+      Array(2, 2, 2).toList
+    )
+    assertEquals(
+      Utils.getOccurences("C2O6H2").toList,
+      Array(2, 6, 2).toList
+    )
   }
 
   @Test def makeArray(): Unit = {
@@ -97,10 +98,13 @@ class UtilsTestSuite {
   }
 
   @Test def getValences(): Unit = {
-    val testSmiles = "C2H2I2"
-    val expectedList = Array(0, 3, 0)
-    val resultArr = Utils.getValences(testSmiles)
-    assertArrayEquals(expectedList, resultArr)
-    println(Utils.getValences("C2O6H2") mkString "\t")
+    assertArrayEquals(
+      Array(0, 3, 0),
+      Utils.getValences("C2H2I2")
+    )
+    assertArrayEquals(
+      Array(3, 1, 0),
+      Utils.getValences("C2O6H2")
+    )
   }
 }
