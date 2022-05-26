@@ -1,5 +1,8 @@
 package MAYGEN
 
+import org.openscience.cdk.DefaultChemObjectBuilder
+import org.openscience.cdk.interfaces._
+
 import scala.collection.immutable.HashMap
 
 object Generation {
@@ -64,4 +67,16 @@ object Generation {
         noHydrogen = true
       }
     }
+
+  def setHydrogens(degree: List[Int], formula: String): List[Int] = {
+    val firstDegrees = Utils.getDegrees(formula)
+    degree zip firstDegrees map {
+      case (currDegree, firstDegree) => firstDegree - currDegree
+    }
+  }
+
+  def run(degree: List[Int]) = {
+    val builder: IChemObjectBuilder = DefaultChemObjectBuilder.getInstance()
+    val atomContainer: IAtomContainer = builder.newInstance(classOf[IAtomContainer])
+  }
 }

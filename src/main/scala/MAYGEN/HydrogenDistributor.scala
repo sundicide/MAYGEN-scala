@@ -113,14 +113,24 @@ object HydrogenDistributor {
   }
 
   def newPartition(formula: String): List[List[Int]] = {
-    newDegrees(formula).map(f => {
-      f.foldLeft(Nil: List[(Int, Int)])((accu, curr) => {
-        if (accu.isEmpty) List((curr, 1))
+    val occcurs = Utils.getOccurences(formula)
+    newDegrees(formula).map((f: List[Int]) => {
+      def loop(n: Int, re: List[Int], acc: List[Int]): List[Int] = {
+        if (n == occcurs.length - 1) acc
         else {
-          if (curr == accu.head._1) (curr, accu.head._2 + 1) :: accu.tail
-          else (curr, 1) :: accu
+          val (curr, rest) = re.splitAt(occcurs(n))
+          val ss: List[(Int, Int)] = curr.foldLeft(Nil: List[(Int, Int)])((accu: List[(Int, Int)], curr2: Int) => {
+            if (accu.isEmpty) List((curr2, 1))
+            else {
+              if (curr2 == accu.head._1) (curr2, accu.head._2 + 1) :: accu.tail
+              else (curr2, 1) :: accu
+            }
+          })
+          val dd: List[Int] = ss.reverse.map(d => d._2)
+          loop(n + 1, rest, acc.concat(dd))
         }
-      }).reverse.map(d => d._2)
+      }
+      loop(0, f, List())
     })
   }
 }
